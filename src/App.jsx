@@ -2,17 +2,39 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
+import { useDispatch } from "react-redux";
+import authService from "./appwrite/auth";
+import { useEffect } from "react";
+import { login, logout } from "./appwrite/store/authSlice";
+import Header from "./components/Header/Header";
+import Footer from "./components/Footer/Footer";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
 
-  console.log(import.meta.env.VITE_APPWRITE_URL);
+  useEffect(() => {
+    authService
+      .getCurrentUser()
+      .then((userData) => {
+        if (userData) {
+          dispatch(login({ userData }));
+        } else {
+          dispatch(logout());
+        }
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-  return (
-    <>
-      <h1>BLOG APP</h1>
-    </>
-  );
+  return !loading ? (
+    <div className="min-h-screen flex flex-wrap content-between ng-gray-400">
+      <div className="w-full block">
+        <Header />
+        <main></main>
+        <Footer />
+      </div>
+    </div>
+  ) : null;
 }
 
 export default App;
